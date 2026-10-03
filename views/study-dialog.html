@@ -1,0 +1,39 @@
+<!--cấu trúc thẻ flast card-->
+<!-- study-dialog.html
+     Dialog ôn tập flashcard: hiển thị card, bộ chọn group ôn, điều hướng thẻ và đánh dấu đã thuộc.
+-->
+<!-- study-dialog.html
+     Dialog ôn tập flashcard: gồm header, bộ chọn nhóm, thẻ học, và các nút điều hướng/đánh dấu đã thuộc.
+-->
+<dialog id="study-dialog" class="dialog study-dialog">
+  <section class="study-panel">
+    <!-- Header dialog: tiêu đề và nút đóng. -->
+    <div class="study-top">
+      <div>
+        <p class="eyebrow">LUYỆN NHỚ CHỦ ĐỘNG</p>
+        <h2>Flashcard</h2>
+      </div><button class="icon-button dialog-close" type="button" data-close="study-dialog"
+        aria-label="Đóng">×</button>
+    </div>
+
+    <!-- Thanh trạng thái: số thẻ hiện tại và nhóm đang ôn. -->
+    <div class="study-controls"><span id="study-progress">0 / 0</span><select id="study-group"
+        aria-label="Chọn nhóm để ôn">
+        <option value="all">Tất cả từ</option>
+      </select></div>
+
+    <!-- Card học: mặt trước hiển thị chữ Hán, mặt sau tóm tắt nghĩa, âm đọc, ví dụ và cách dùng. -->
+    <button id="flashcard" class="flashcard" type="button" aria-label="Lật thẻ">
+      <span id="card-side-label" class="card-side-label">CHỮ PHỒN THỂ</span>
+      <strong id="card-main">準備好了嗎？</strong>
+      <div id="card-secondary" class="card-secondary">
+        <span class="card-front-hint">Nhấn để lật thẻ</span>
+      </div>
+    </button>
+
+    <!-- Nút di chuyển thẻ và đánh dấu từ đã thuộc. -->
+    <div class="study-actions"><button id="study-prev" class="button button-outline" type="button">←
+      Trước</button><button id="speak-word" class="button button-outline" type="button">🔊 Nghe từ</button><button id="mark-learned" class="button button-learned" type="button">✓ Đã thuộc</button><button
+        id="study-next" class="button button-primary" type="button">Tiếp →</button></div>
+  </section>
+</dialog>

@@ -1,0 +1,36 @@
+<!-- workspace.html
+     Giao diện chính sau khi người dùng vào app: sidebar, topbar, danh sách từ, thống kê và nút flashcard.
+-->
+<div id="app-view" class="app-shell hidden">
+  <aside class="sidebar">
+    <a class="brand sidebar-brand" href="#"><span class="brand-mark">台</span><span>TỪ ĐÀI LOAN</span></a>
+    <div class="side-label">KHÔNG GIAN HỌC</div>
+    <button class="nav-item active" data-view="vocabulary"><span class="nav-symbol">文</span>Từ vựng <span id="word-count-nav" class="nav-count">0</span></button>
+    <button class="nav-item" id="study-open"><span class="nav-symbol">卡</span>Flashcard <span class="nav-arrow">↗</span></button>
+    <div class="side-heading"><span>NHÓM HỌC</span><button id="add-group-shortcut" class="icon-button" title="Tạo nhóm của tôi" aria-label="Tạo nhóm của tôi">+</button></div>
+    <div id="group-nav" class="group-nav"></div>
+    <div class="sidebar-bottom">
+      <div class="user-badge"><span id="user-avatar" class="avatar">台</span><span class="user-copy"><strong id="user-name">Khách</strong><small id="account-mode">Dùng thử</small></span><button id="sign-out" class="icon-button sign-out" title="Đăng xuất" aria-label="Đăng xuất">↪</button></div>
+    </div>
+  </aside>
+  <section class="main-area">
+    <header class="topbar"><div><span class="breadcrumb">KHÔNG GIAN HỌC</span><span class="breadcrumb-sep">/</span><span id="current-location">Từ vựng</span></div><div class="top-actions"><span class="sync-status"><i></i><span id="sync-label">Đã lưu trên thiết bị</span></span><button id="top-add-word" class="button button-primary"><span>+</span> Thêm từ</button></div></header>
+    <main class="content">
+      <section class="welcome-row"><div><p class="eyebrow">THƯ VIỆN TIẾNG ĐÀI LOAN</p><h1 id="page-heading">Thư viện chuẩn</h1><p id="page-subtitle" class="page-subtitle">Tìm từ trong thư viện chuẩn; bài học được quản lý cố định.</p></div><button id="manage-groups" class="button button-outline">Nhóm của tôi</button></section>
+      <section class="stats-row" aria-label="Thống kê học tập">
+        <div class="stat"><span class="stat-label">TỪ CHUẨN</span><strong id="stat-total">0</strong><span class="stat-note">đang có trong thư viện</span></div>
+        <div class="stat"><span class="stat-label">NHÓM CỦA TÔI</span><strong id="stat-groups">0</strong><span class="stat-note">nhóm tự tạo</span></div>
+        <div class="stat stat-accent"><span class="stat-label">ĐÃ THUỘC</span><strong id="stat-learned">0</strong><span class="stat-note">từ đã đánh dấu</span></div>
+        <button id="study-cta" class="study-prompt"><span class="prompt-icon">卡</span><span><strong>Đến giờ ôn bài?</strong><small>Bắt đầu một lượt flashcard</small></span><span class="prompt-arrow">→</span></button>
+      </section>
+      <section class="vocabulary-section">
+        <div class="section-heading"><div><h2>Sổ từ vựng</h2><span id="result-count" class="result-count">0 từ</span></div></div>
+        <div class="toolbar"><label class="search-box"><span aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="Tìm chữ Hán, zhuyin, pinyin hoặc nghĩa..." aria-label="Tìm từ vựng" /><kbd>⌘ K</kbd></label><select id="group-filter" aria-label="Chọn bài chuẩn hoặc nhóm cá nhân"><option value="all">Toàn bộ thư viện chuẩn</option></select><button id="add-group-inline" class="button button-outline button-small">+ Tạo nhóm</button></div>
+        <div id="vocabulary-list" class="vocabulary-list"></div>
+        <nav id="vocabulary-pagination" class="pagination hidden" aria-label="Điều hướng trang thư viện"></nav>
+        <div id="empty-state" class="empty-state hidden"><span class="empty-mark">字</span><h3>Chưa có từ nào ở đây</h3><p>Thêm từ đầu tiên để bắt đầu tạo bộ sưu tập.</p><button id="empty-add-word" class="button button-primary">+ Thêm từ mới</button></div>
+      </section>
+      <footer class="page-footer"><span>用心學習 · Học đều mỗi ngày</span><span>繁體中文 · Tiếng Đài Loan</span></footer>
+    </main>
+  </section>
+</div>

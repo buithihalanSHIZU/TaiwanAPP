@@ -1,0 +1,31 @@
+<!-- auth.html
+     Màn hình đăng nhập/đăng ký và xem trước giao diện landing page của app.
+     Chứa form login/signup, button demo và phần nghệ thuật ở bên phải.
+-->
+<main id="auth-view" class="auth-view">
+  <section class="auth-panel">
+    <a class="brand" href="#"><span class="brand-mark">台</span><span>TỪ ĐÀI LOAN</span></a>
+    <div class="auth-copy">
+      <p class="eyebrow">GHI NHỚ TỪNG TỪ, TIẾN GẦN HƠN MỖI NGÀY</p>
+      <h1>Chào bạn,<br />mình cùng học nhé.</h1>
+      <p>Tạo không gian từ vựng của riêng bạn và ôn tập theo nhịp của mình.</p>
+    </div>
+    <form id="auth-form" class="auth-form">
+      <label>Email<input id="auth-email" type="email" autocomplete="email" placeholder="ban@email.com"
+          required /></label>
+      <label>Mật khẩu<input id="auth-password" type="password" autocomplete="current-password"
+          placeholder="Ít nhất 6 ký tự" minlength="6" required /></label>
+      <button id="auth-submit" class="button button-primary button-wide" type="submit">Đăng nhập</button>
+    </form>
+    <button id="auth-switch" class="text-button" type="button">Chưa có tài khoản? Đăng ký</button>
+    <div id="auth-message" class="message" role="status"></div>
+    <div id="backend-note" class="backend-note"></div>
+    <button id="demo-enter" class="button button-quiet button-wide" type="button">Dùng thử không cần tài khoản</button>
+  </section>
+  <aside class="auth-art" aria-label="Góc học tiếng Đài Loan">
+    <div class="art-label">NOTES FROM TAIWAN <span>25°02′N 121°33′E</span></div>
+    <div class="art-kanji">你好</div>
+    <div class="art-bottom"><span>nǐ hǎo</span><span>xin chào</span></div>
+    <div class="art-stamp">台灣<br />日常</div>
+  </aside>
+</main>

@@ -1,0 +1,6 @@
+.DS_Store
+
+# Local development overrides
+.env
+.env.*
+!.env.example

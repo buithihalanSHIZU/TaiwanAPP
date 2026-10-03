@@ -1,0 +1,19 @@
+<!-- group-dialog.html
+     Dialog quản lý nhóm của tôi: tạo nhóm, đổi tên, xóa, tìm kiếm và hiển thị danh sách nhóm.
+-->
+<dialog id="group-dialog" class="dialog dialog-narrow">
+  <form id="group-form" method="dialog" class="dialog-form">
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">SẮP XẾP BỘ SƯU TẬP</p>
+        <h2>Quản lý nhóm</h2>
+      </div><button class="icon-button dialog-close" type="button" data-close="group-dialog"
+        aria-label="Đóng">×</button>
+    </div>
+    <div class="group-create"><input id="new-group-name" maxlength="36" placeholder="Tên nhóm mới"
+        aria-label="Tên nhóm mới" /><button class="button button-primary" type="submit">Thêm nhóm</button></div>
+    <label class="search-box group-search"><span aria-hidden="true">⌕</span><input id="group-search" type="search"
+        placeholder="Tìm nhóm..." aria-label="Tìm nhóm" /></label>
+    <div id="group-manager-list" class="group-manager-list"></div>
+  </form>
+</dialog>

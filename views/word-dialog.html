@@ -1,0 +1,40 @@
+<!-- word-dialog.html
+     Dialog thêm từ: cho phép nhập từ riêng hoặc tìm từ chuẩn/từ riêng đã có để gắn vào nhóm.
+-->
+<dialog id="word-dialog" class="dialog">
+  <section class="dialog-form">
+    <!-- Phần tiêu đề và nút đóng dialog. -->
+    <div class="dialog-heading"><div><p class="eyebrow">NHÓM CỦA TÔI</p><h2 id="word-dialog-title">Thêm từ vào nhóm</h2></div><button class="icon-button dialog-close" type="button" data-close="word-dialog" aria-label="Đóng">×</button></div>
+
+    <!-- Chọn nhóm mà từ sẽ được thêm vào bằng menu nằm gọn trong dialog. -->
+    <div class="target-group-field">
+      <span id="add-word-target-label">Nhóm nhận từ</span>
+      <select id="add-word-target" class="hidden" aria-hidden="true" tabindex="-1"></select>
+      <div class="group-picker">
+        <button id="add-word-target-trigger" class="group-picker-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="add-word-target-menu" aria-label="Nhóm nhận từ: Chọn nhóm cá nhân">
+          <span id="add-word-target-value">Chọn nhóm cá nhân</span><span class="group-picker-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div id="add-word-target-menu" class="group-picker-menu hidden" role="listbox" aria-labelledby="add-word-target-label"></div>
+      </div>
+    </div>
+
+    <!-- Chuyển đổi giữa 2 chế độ: nhập từ mới hoặc tìm trong thư viện chuẩn. -->
+    <div class="word-mode-switch" role="group" aria-label="Chọn nguồn từ">
+      <button class="button button-outline active" type="button" data-word-mode="custom" aria-pressed="true">Tự tạo từ</button>
+        <button class="button button-outline" type="button" data-word-mode="library" aria-pressed="false">Tìm từ có sẵn</button>
+    </div>
+
+    <!-- Form nhập từ riêng do người dùng tự tạo. -->
+    <form id="word-form" class="word-create-form">
+      <input id="word-id" type="hidden" />
+      <div id="word-custom-fields" class="form-grid"><label>Chữ phồn thể <span class="required">*</span><input id="word-traditional" required placeholder="你好" /></label><label>Zhuyin<input id="word-zhuyin" placeholder="ㄋㄧˇ ㄏㄠˇ" /></label><label>Pinyin<input id="word-pinyin" placeholder="nǐ hǎo" /></label><label>Hán Việt<input id="word-han-viet" placeholder="Nhĩ hảo" /></label><label class="full-field">Nghĩa tiếng Việt <span class="required">*</span><input id="word-meaning" required placeholder="xin chào" /></label><label class="full-field">Cách dùng<input id="word-usage" placeholder="Ghi chú cách dùng" /></label><label class="full-field">Câu ví dụ<input id="word-example" placeholder="你好，很高興認識你。" /></label></div>
+      <div class="dialog-actions"><button class="button button-quiet" type="button" data-close="word-dialog">Hủy</button><button id="word-save" class="button button-primary" type="submit">Lưu từ riêng</button></div>
+    </form>
+
+    <!-- Panel tìm kiếm từ trong thư viện chuẩn để thêm vào nhóm cá nhân. -->
+    <section id="library-panel" class="library-panel hidden">
+        <label class="search-box library-search"><span aria-hidden="true">⌕</span><input id="library-search-input" type="search" placeholder="Tìm từ trong thư viện..." aria-label="Tìm từ đã có trong thư viện" /></label>
+      <div id="library-results" class="library-results"></div>
+    </section>
+  </section>
+</dialog>
