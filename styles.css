@@ -29,6 +29,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: clip;
   background: #f5f4ef;
   font-family: var(--vi-font);
 }
@@ -613,6 +614,17 @@ button:disabled {
   border-bottom: 1px solid var(--line);
   background: #fbfaf7ed;
   backdrop-filter: blur(14px);
+}
+
+.topbar-leading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.mobile-menu-toggle,
+.mobile-menu-backdrop {
+  display: none;
 }
 
 .breadcrumb {
@@ -1694,49 +1706,68 @@ kbd {
   }
 
   .sidebar {
-    position: sticky;
+    position: fixed;
+    left: 0;
     z-index: 3;
-    top: auto;
+    display: none;
+    top: 0;
     bottom: 0;
-    order: 2;
-    flex: 0 0 58px;
-    flex-direction: row;
-    width: 100%;
-    height: 58px;
-    padding: 5px 12px;
+    width: min(82vw, 300px);
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform .2s ease;
+    box-shadow: 12px 0 30px #173c3640;
   }
 
   .app-shell {
-    flex-direction: column;
-    padding-bottom: 58px;
+    position: relative;
   }
 
-  .sidebar-brand,
-  .side-label,
-  .side-heading,
-  .group-nav,
-  .sidebar-bottom,
-  .nav-count,
-  .nav-arrow {
-    display: none;
+  .mobile-menu-open .sidebar {
+    display: flex;
+    transform: translateX(0);
   }
 
   .nav-item {
-    justify-content: center;
-    gap: 7px;
-    width: 50%;
-    min-height: 46px;
-    padding: 0 5px;
-    font-size: 10px;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 41px;
+    padding: 0 10px;
+    font-size: 12px;
   }
 
   .nav-symbol {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
 
   .main-area {
-    order: 1;
+    width: 100%;
+  }
+
+  .mobile-menu-toggle {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--forest);
+    font-size: 18px;
+  }
+
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    border: 0;
+    background: #152c2770;
+  }
+
+  .mobile-menu-open .mobile-menu-backdrop {
+    display: block;
   }
 
   .topbar {
@@ -1902,6 +1933,17 @@ kbd {
 
   .word-example {
     max-width: 165px;
+  }
+
+  .pagination {
+    gap: 4px;
+    font-size: 9px;
+  }
+
+  .pagination button {
+    min-width: 0;
+    padding: 7px 6px;
+    font-size: 9px;
   }
 
   .page-footer span:last-child {

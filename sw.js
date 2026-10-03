@@ -1,4 +1,4 @@
-const CACHE_NAME = "tu-dai-loan-shell-v1";
+const CACHE_NAME = "tu-dai-loan-shell-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -44,14 +44,12 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET" || new URL(event.request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== "basic") return response;
+    fetch(event.request).then((response) => {
+      if (response && response.status === 200 && response.type === "basic") {
         const responseToCache = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
-        return response;
-      });
-    })
+      }
+      return response;
+    }).catch(() => caches.match(event.request, { ignoreSearch: true }))
   );
 });
