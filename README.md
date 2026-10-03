@@ -1,10 +1,12 @@
 # Từ Đài Loan
 
-Ứng dụng web học tiếng Đài Loan bằng flashcard. 15 bài chuẩn là thư viện chỉ đọc; mỗi user có tiến độ học, nhóm riêng, có thể thêm từ riêng hoặc tìm từ chuẩn/từ riêng đã có để liên kết vào nhiều nhóm mà không tạo bản ghi trùng.
+Progressive Web App (PWA) học tiếng Đài Loan bằng flashcard. 15 bài chuẩn là thư viện chỉ đọc; mỗi user có tiến độ học, nhóm riêng, có thể thêm từ riêng hoặc tìm từ chuẩn/từ riêng đã có để liên kết vào nhiều nhóm mà không tạo bản ghi trùng. Có thể cài ứng dụng từ trình duyệt; app shell được cache để mở lại khi mất mạng, còn dữ liệu Supabase vẫn đồng bộ khi có kết nối.
 
 ## Cấu trúc mã nguồn
 
 - `index.html`: khung trang và điểm nạp ứng dụng.
+- `manifest.webmanifest`: tên, màu sắc và biểu tượng để cài PWA.
+- `sw.js`: cache app shell cho lần mở lại khi offline.
 - `views/`: HTML riêng cho đăng nhập, workspace, từ vựng, nhóm và flashcard.
 - `js/app.js`: tải các HTML partial.
 - `js/bootstrap.js`: khởi tạo các feature sau khi giao diện đã nạp.

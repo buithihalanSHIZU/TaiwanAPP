@@ -18,6 +18,11 @@ try {
   await Promise.all(views.map(mountView));
   const { startApp } = await import("./bootstrap.js?v=20261003-group-picker");
   startApp();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch((error) => {
+      console.warn("Không thể bật chế độ PWA offline:", error);
+    });
+  }
 } catch (error) {
   const toast = document.querySelector("#toast");
   toast.textContent = error.message;
