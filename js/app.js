@@ -16,7 +16,7 @@ async function mountView([selector, path]) {
 
 try {
   await Promise.all(views.map(mountView));
-  const { startApp } = await import("./bootstrap.js?v=20261003-group-picker");
+  const { startApp } = await import("./bootstrap.js?v=20261004-shuffle");
   startApp();
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch((error) => {

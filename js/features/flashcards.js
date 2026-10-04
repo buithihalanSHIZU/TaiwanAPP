@@ -3,7 +3,7 @@
 import { $, notify, state } from "../core/state.js";
 import { persist } from "../core/data.js";
 import { runAction } from "../core/session.js";
-import { openStudy, renderCard, studyWords } from "../ui/render.js";
+import { renderCard, studyWords } from "../ui/render.js";
 
 // initFlashcards(): bind các event của flashcard và các nút điều hướng trong dialog ôn tập.
 export function initFlashcards() {
@@ -43,8 +43,53 @@ export function initFlashcards() {
     state.studyIndex =
       (state.studyIndex + direction + count) % count;
 
+    state.studyRetainedId = null;
     state.flipped = false;
     renderCard();
+  }
+
+  function shuffleDeck(words) {
+    const shuffled = [...words];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+    }
+    return shuffled;
+  }
+
+  function deckKey() {
+    return state.studyGroup;
+  }
+
+  function beginStudy(shuffle) {
+    const words = studyWords();
+    if (!words.length) return;
+    const key = deckKey();
+    const previous = state.lastShuffledDecks[key] || [];
+    let deck = shuffle ? shuffleDeck(words) : words;
+    if (shuffle && deck.length > 1 && deck.every((word, index) => word.id === previous[index])) {
+      [deck[0], deck[1]] = [deck[1], deck[0]];
+    }
+    if (shuffle) state.lastShuffledDecks[key] = deck.map((word) => word.id);
+    state.studyDeck = deck;
+    state.studyDeckKey = key;
+    state.studyIndex = 0;
+    state.studyRetainedId = null;
+    state.flipped = false;
+    $("#shuffle-dialog").close();
+    $("#study-dialog").showModal();
+    renderCard();
+  }
+
+  function openStudyPrompt() {
+    if (state.activeGroup !== "all") state.studyGroup = "current";
+    $("#study-group").value = state.studyGroup;
+    state.studyDeck = null;
+    state.studyDeckKey = null;
+    if (!studyWords().length) {
+      return notify("Toàn bộ từ trong phạm vi này đã thuộc. Mở mục “Từ đã thuộc” để ôn lại.");
+    }
+    $("#shuffle-dialog").showModal();
   }
 
   // isControl(): bỏ qua swipe/click khi người dùng đang tương tác với button/input bên trong card.
@@ -56,8 +101,10 @@ export function initFlashcards() {
     return control && control !== card;
   }
 
-  $("#study-open").addEventListener("click", openStudy);
-  $("#study-cta").addEventListener("click", openStudy);
+  $("#study-open").addEventListener("click", openStudyPrompt);
+  $("#study-cta").addEventListener("click", openStudyPrompt);
+  $("#shuffle-yes").addEventListener("click", () => beginStudy(true));
+  $("#shuffle-no").addEventListener("click", () => beginStudy(false));
 
   // Bắt đầu chạm hoặc kéo chuột.
   card.addEventListener("pointerdown", (event) => {
@@ -145,6 +192,9 @@ export function initFlashcards() {
     state.studyGroup = event.target.value;
     state.studyIndex = 0;
     state.flipped = false;
+    state.studyRetainedId = null;
+    state.studyDeck = null;
+    state.studyDeckKey = null;
     renderCard();
   });
 
@@ -160,16 +210,18 @@ export function initFlashcards() {
       (item) => item.id === word.id
     );
 
+    const nextLearned = !word.learned;
+    state.studyRetainedId = nextLearned ? word.id : null;
     runAction(
       () => isStandardWord
         ? persist("user_word_progress", "upsert", {
             vocabulary_id: word.id,
-            learned: !word.learned,
+            learned: nextLearned,
           })
         : persist(
             "user_vocabulary",
             "update",
-            { learned: !word.learned },
+            { learned: nextLearned },
             word.id
           ),
       word.learned

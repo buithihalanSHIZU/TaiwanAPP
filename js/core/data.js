@@ -39,12 +39,17 @@ function readDemo() {
   try {
     const saved = JSON.parse(localStorage.getItem(demoKey));
     if (saved && Array.isArray(saved.standardGroups) && Array.isArray(saved.standardWords)) {
+      saved.progress = Array.isArray(saved.progress) ? saved.progress : [];
+      saved.userWords = Array.isArray(saved.userWords) ? saved.userWords : [];
+      saved.userGroups = Array.isArray(saved.userGroups) ? saved.userGroups : [];
+      saved.groupLinks = Array.isArray(saved.groupLinks) ? saved.groupLinks : [];
       if (!Array.isArray(saved.userWordLinks)) {
         saved.userWordLinks = (saved.userWords || []).filter((word) => word.group_id).map((word) => ({
           group_id: word.group_id,
           vocabulary_id: word.id,
         }));
       }
+      saved.userWordLinks = Array.isArray(saved.userWordLinks) ? saved.userWordLinks : [];
       (saved.userWords || []).forEach((word) => { word.group_id = null; });
       return saved;
     }
@@ -112,9 +117,10 @@ export async function refreshData() {
     };
   }
   state.standardGroups = data.standardGroups;
+  state.progress = Array.isArray(data.progress) ? data.progress : [];
   state.standardWords = data.standardWords.map((word) => ({
     ...word,
-    learned: data.progress.some((progress) => progress.vocabulary_id === word.id && progress.learned),
+    learned: state.progress.some((progress) => progress.vocabulary_id === word.id && progress.learned),
   }));
   state.userGroups = data.userGroups;
   state.userWords = data.userWords;
@@ -123,7 +129,6 @@ export async function refreshData() {
     vocabulary_id: word.id,
   }));
   state.groupLinks = data.groupLinks;
-  state.progress = data.progress;
 }
 
 // persist(): lưu/insert/update/delete dữ liệu theo table và operation, hỗ trợ cả demo localStorage và Supabase.

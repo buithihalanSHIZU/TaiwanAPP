@@ -69,6 +69,21 @@ export function initVocabulary() {
     const addButton = event.target.closest("[data-library-add]");
     const unlinkButton = event.target.closest("[data-link-remove]");
     const unlinkUserWordButton = event.target.closest("[data-user-link-remove]");
+    const statusButton = event.target.closest("[data-word-status]");
+    if (statusButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      const isStandard = statusButton.dataset.wordSource === "standard";
+      const word = (isStandard ? state.standardWords : state.userWords).find((item) => item.id === statusButton.dataset.wordStatus);
+      if (!word) return;
+      runAction(
+        () => isStandard
+          ? persist("user_word_progress", "upsert", { vocabulary_id: word.id, learned: !word.learned })
+          : persist("user_vocabulary", "update", { learned: !word.learned }, word.id),
+        word.learned ? "Đã chuyển từ về Chưa thuộc." : "Đã đánh dấu từ đã thuộc.",
+      );
+      return;
+    }
     if (editButton) {
       const word = state.userWords.find((item) => item.id === editButton.dataset.wordEdit);
       const active = activeGroupInfo();
@@ -140,7 +155,21 @@ export function initVocabulary() {
 
   // Thêm từ thư viện bằng cách tạo liên kết với nhóm đích, không sao chép bản ghi từ.
   $("#library-results").addEventListener("click", (event) => {
+    const statusButton = event.target.closest("[data-word-status]");
     const button = event.target.closest("[data-library-add]");
+    if (statusButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      const isStandard = statusButton.dataset.wordSource === "standard";
+      const word = (isStandard ? state.standardWords : state.userWords).find((item) => item.id === statusButton.dataset.wordStatus);
+      if (!word) return;
+      return runAction(
+        () => isStandard
+          ? persist("user_word_progress", "upsert", { vocabulary_id: word.id, learned: !word.learned })
+          : persist("user_vocabulary", "update", { learned: !word.learned }, word.id),
+        word.learned ? "Đã chuyển từ về Chưa thuộc." : "Đã đánh dấu từ đã thuộc.",
+      ).then(renderLibraryResults);
+    }
     if (!button) return;
     const groupId = $("#add-word-target").value;
     if (!groupId) return notify("Chọn nhóm nhận từ trước.");

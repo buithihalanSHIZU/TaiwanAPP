@@ -987,6 +987,25 @@ kbd {
   white-space: nowrap;
 }
 
+.status-tag {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: .2rem .55rem;
+}
+
+.status-tag.learned-tag {
+  background: #dff4e7;
+}
+
+.status-tag.unlearned-tag {
+  background: #f1eee8;
+  color: #756e63;
+}
+
 .source-tag {
   padding: 3px 6px;
   border-radius: 3px;
@@ -1090,6 +1109,18 @@ kbd {
   background: var(--paper);
   color: #27332d;
   box-shadow: 0 24px 80px #1c332b30;
+}
+
+.shuffle-dialog {
+  max-width: 460px;
+}
+
+.shuffle-panel {
+  padding: 32px;
+}
+
+.shuffle-panel h2 {
+  margin: 8px 0 24px;
 }
 
 .dialog::backdrop {

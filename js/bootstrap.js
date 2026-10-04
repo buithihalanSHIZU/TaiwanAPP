@@ -4,7 +4,7 @@ import { connectSupabase, hasBackend } from "./core/data.js";
 import { $, state } from "./core/state.js";
 import { openApp } from "./core/session.js?v=20261003-group-picker";
 import { configureAuth, initAuth } from "./features/auth.js";
-import { initFlashcards } from "./features/flashcards.js?v=20261003-speech-voice-2";
+import { initFlashcards } from "./features/flashcards.js?v=20261004-shuffle";
 import { initGlobalInteractions } from "./features/global.js";
 import { initGroups } from "./features/groups.js";
 import { initVocabulary } from "./features/vocabulary.js?v=20261003-group-picker";

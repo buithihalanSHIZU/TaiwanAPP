@@ -10,6 +10,9 @@ const groupKey = (type, id) => `${type}:${id}`;
 
 // activeGroupInfo(): xác định nhóm hiện tại đang chọn trong sidebar và trả về định dạng chuẩn để render.
 export function activeGroupInfo() {
+  if (state.activeGroup === "custom" || state.activeGroup === "learned") {
+    return { type: state.activeGroup, group: null };
+  }
   if (state.activeGroup.startsWith("standard:")) {
     const group = state.standardGroups.find((item) => item.id === state.activeGroup.slice(9));
     return group ? { type: "standard", group } : { type: "all", group: null };
@@ -24,6 +27,11 @@ export function activeGroupInfo() {
 // visibleWords(): trả về danh sách từ hiện tại có thể thấy theo nhóm đang chọn, kèm source để biết đây là chuẩn hay từ của người dùng.
 export function visibleWords() {
   const { type, group } = activeGroupInfo();
+  if (type === "custom") return state.userWords.map((word) => ({ word, source: "user" }));
+  if (type === "learned") return [
+    ...state.standardWords.filter((word) => word.learned).map((word) => ({ word, source: "standard" })),
+    ...state.userWords.filter((word) => word.learned).map((word) => ({ word, source: "user" })),
+  ];
   if (type === "standard") return state.standardWords.filter((word) => word.standard_group_id === group.id).map((word) => ({ word, source: "standard" }));
   if (type === "user") {
     const linkedIds = new Set(state.groupLinks.filter((link) => link.group_id === group.id).map((link) => link.vocabulary_id));
@@ -74,8 +82,7 @@ export function render() {
   renderWords();
   $("#stat-total").textContent = state.standardWords.length;
   $("#stat-groups").textContent = state.userGroups.length;
-  $("#stat-learned").textContent = state.standardWords.filter((word) => word.learned).length
-    + state.userWords.filter((word) => word.learned).length;
+  $("#stat-learned").textContent = learnedWords().length;
   $("#word-count-nav").textContent = visibleWords().length;
 }
 
@@ -84,18 +91,18 @@ export function renderGroups() {
   const groupSearch = $("#group-search").value.trim().toLocaleLowerCase("vi");
   const standardNav = state.standardGroups.map((group) => `<button class="group-link ${state.activeGroup === groupKey("standard", group.id) ? "selected" : ""}" data-group-filter="${groupKey("standard", escapeHTML(group.id))}"><span class="group-dot dot-${(group.lesson_number - 1) % 4}"></span><span>${escapeHTML(group.name)}</span><small>${state.standardWords.filter((word) => word.standard_group_id === group.id).length}</small></button>`).join("");
   const userNav = state.userGroups.map((group, index) => `<button class="group-link ${state.activeGroup === groupKey("user", group.id) ? "selected" : ""}" data-group-filter="${groupKey("user", escapeHTML(group.id))}"><span class="group-dot dot-${index % 4}"></span><span>${escapeHTML(group.name)}</span><small>${groupWordCount(group.id)}</small></button>`).join("");
-  $("#group-nav").innerHTML = `<button class="group-link ${state.activeGroup === "all" ? "selected" : ""}" data-group-filter="all"><span class="group-dot dot-all"></span><span>Toàn bộ thư viện</span><small>${state.standardWords.length + state.userWords.length}</small></button><div class="group-nav-label">BÀI CHUẨN</div>${standardNav}<div class="group-nav-label">NHÓM CỦA TÔI</div>${userNav || `<p class="group-nav-empty">Chưa có nhóm riêng</p>`}`;
+  $("#group-nav").innerHTML = `<button class="group-link ${state.activeGroup === "all" ? "selected" : ""}" data-group-filter="all"><span class="group-dot dot-all"></span><span>Toàn bộ thư viện</span><small>${state.standardWords.length + state.userWords.length}</small></button><button class="group-link ${state.activeGroup === "custom" ? "selected" : ""}" data-group-filter="custom"><span class="group-dot dot-all"></span><span>Từ tự thêm</span><small>${state.userWords.length}</small></button><button class="group-link ${state.activeGroup === "learned" ? "selected" : ""}" data-group-filter="learned"><span class="group-dot dot-all"></span><span>Từ đã thuộc</span><small>${learnedWords().length}</small></button><div class="group-nav-label">BÀI CHUẨN</div>${standardNav}<div class="group-nav-label">NHÓM CỦA TÔI</div>${userNav || `<p class="group-nav-empty">Chưa có nhóm riêng</p>`}`;
 
   const filter = $("#group-filter");
   const selected = filter.value || state.activeGroup;
-  filter.innerHTML = `<option value="all">Toàn bộ thư viện</option><optgroup label="Bài chuẩn">${state.standardGroups.map((group) => `<option value="${escapeHTML(groupKey("standard", group.id))}">${escapeHTML(group.name)}</option>`).join("")}</optgroup><optgroup label="Nhóm của tôi">${state.userGroups.map((group) => `<option value="${escapeHTML(groupKey("user", group.id))}">${escapeHTML(group.name)}</option>`).join("")}</optgroup>`;
-  filter.value = selected === "all" || [...state.standardGroups.map((group) => groupKey("standard", group.id)), ...state.userGroups.map((group) => groupKey("user", group.id))].includes(selected) ? selected : "all";
+  filter.innerHTML = `<option value="all">Toàn bộ thư viện</option><option value="custom">Từ tự thêm</option><option value="learned">Từ đã thuộc</option><optgroup label="Bài chuẩn">${state.standardGroups.map((group) => `<option value="${escapeHTML(groupKey("standard", group.id))}">${escapeHTML(group.name)}</option>`).join("")}</optgroup><optgroup label="Nhóm của tôi">${state.userGroups.map((group) => `<option value="${escapeHTML(groupKey("user", group.id))}">${escapeHTML(group.name)}</option>`).join("")}</optgroup>`;
+  filter.value = ["all", "custom", "learned", ...state.standardGroups.map((group) => groupKey("standard", group.id)), ...state.userGroups.map((group) => groupKey("user", group.id))].includes(selected) ? selected : "all";
   state.activeGroup = filter.value;
 
   const studySelect = $("#study-group");
   const previousStudyGroup = studySelect.value || state.studyGroup;
-  studySelect.innerHTML = `<option value="all">Toàn bộ từ</option><option value="current">Nhóm đang xem</option><optgroup label="Bài chuẩn">${state.standardGroups.map((group) => `<option value="${escapeHTML(groupKey("standard", group.id))}">${escapeHTML(group.name)}</option>`).join("")}</optgroup><optgroup label="Nhóm của tôi">${state.userGroups.map((group) => `<option value="${escapeHTML(groupKey("user", group.id))}">${escapeHTML(group.name)}</option>`).join("")}</optgroup>`;
-  const validStudyGroups = ["all", "current", ...state.standardGroups.map((group) => groupKey("standard", group.id)), ...state.userGroups.map((group) => groupKey("user", group.id))];
+  studySelect.innerHTML = `<option value="all">Toàn bộ từ</option><option value="current">Nhóm đang xem</option><option value="custom">Từ tự thêm</option><optgroup label="Bài chuẩn">${state.standardGroups.map((group) => `<option value="${escapeHTML(groupKey("standard", group.id))}">${escapeHTML(group.name)}</option>`).join("")}</optgroup><optgroup label="Nhóm của tôi">${state.userGroups.map((group) => `<option value="${escapeHTML(groupKey("user", group.id))}">${escapeHTML(group.name)}</option>`).join("")}</optgroup>`;
+  const validStudyGroups = ["all", "current", "custom", ...state.standardGroups.map((group) => groupKey("standard", group.id)), ...state.userGroups.map((group) => groupKey("user", group.id))];
   studySelect.value = validStudyGroups.includes(previousStudyGroup) ? previousStudyGroup : "all";
   state.studyGroup = studySelect.value;
 
@@ -116,24 +123,29 @@ export function renderWords() {
   const filtered = visibleWords().filter(({ word }) => [word.traditional, word.zhuyin, word.pinyin, word.han_viet, word.meaning, word.example, word.usage_vi].join(" ").toLocaleLowerCase("vi").includes(query));
   const { type, group } = activeGroupInfo();
   const pageSize = 10;
-  const shouldPaginate = type === "all";
+  const shouldPaginate = type === "all" || type === "custom" || type === "learned";
   const pageCount = shouldPaginate ? Math.max(1, Math.ceil(filtered.length / pageSize)) : 1;
   state.libraryPage = Math.min(Math.max(state.libraryPage, 1), pageCount);
   const pageStart = shouldPaginate ? (state.libraryPage - 1) * pageSize : 0;
   const visible = shouldPaginate ? filtered.slice(pageStart, pageStart + pageSize) : filtered;
-  $("#current-location").textContent = type === "standard" ? group.name : type === "user" ? group.name : "Toàn bộ thư viện";
-  $("#page-heading").textContent = type === "standard" ? group.name : type === "user" ? group.name : "Toàn bộ thư viện";
+  const heading = type === "standard" ? group.name : type === "user" ? group.name : type === "custom" ? "Từ tự thêm" : type === "learned" ? "Từ đã thuộc" : "Toàn bộ thư viện";
+  $("#current-location").textContent = heading;
+  $("#page-heading").textContent = heading;
   $("#page-subtitle").textContent = type === "user"
     ? "Từ thư viện đã thêm và từ vựng riêng trong nhóm này."
     : type === "standard"
       ? "Bài học chuẩn để tra cứu và thêm từ chưa thuộc vào nhóm cá nhân."
-      : "Tra cứu từ trong thư viện chuẩn và từ riêng của bạn.";
+      : type === "custom"
+        ? "Toàn bộ từ do bạn tự tạo, kể cả khi không còn thuộc nhóm nào."
+        : type === "learned"
+          ? "Các từ đã đánh dấu thuộc để tra cứu và ôn lại."
+          : "Tra cứu từ trong thư viện chuẩn và từ riêng của bạn.";
   $("#result-count").textContent = `${filtered.length} từ`;
   $("#vocabulary-list").classList.toggle("hidden", filtered.length === 0);
   $("#empty-state").classList.toggle("hidden", filtered.length > 0);
   $("#empty-state").classList.toggle("empty-user-group", type === "user");
-  $("#empty-state h3").textContent = type === "user" ? "Nhóm này chưa có từ" : "Không tìm thấy từ phù hợp";
-  $("#empty-state p").textContent = type === "user" ? "Thêm từ của bạn hoặc tìm từ chưa thuộc trong thư viện." : "Thử từ khóa khác hoặc chọn một bài học.";
+  $("#empty-state h3").textContent = type === "user" ? "Nhóm này chưa có từ" : type === "learned" ? "Chưa có từ đã thuộc" : "Không tìm thấy từ phù hợp";
+  $("#empty-state p").textContent = type === "user" ? "Thêm từ của bạn hoặc tìm từ chưa thuộc trong thư viện." : type === "learned" ? "Các từ được đánh dấu Đã thuộc sẽ xuất hiện ở đây." : "Thử từ khóa khác hoặc chọn một bài học.";
   $("#empty-add-word").classList.toggle("hidden", type !== "user");
   $("#vocabulary-list").innerHTML = visible.map(({ word, source }) => {
     const groupName = source === "standard"
@@ -142,9 +154,10 @@ export function renderWords() {
         ? group?.name
         : type === "user"
           ? group?.name
-          : userWordGroupNames(word.id).join(", ") || "Thư viện cá nhân";
+          : userWordGroupNames(word.id).join(", ") || "Chưa có nhóm";
     const alreadyInGroup = type === "user" && source === "standard" && state.groupLinks.some((link) => link.group_id === group.id && link.vocabulary_id === word.id);
     const sourceLabel = source === "standard" ? "Bài chuẩn" : source === "linked-standard" ? "Từ thư viện" : "Từ của tôi";
+    const statusButton = `<button type="button" class="status-tag ${word.learned ? "learned-tag" : "unlearned-tag"}" data-word-status="${escapeHTML(word.id)}" data-word-source="${source === "user" ? "user" : "standard"}">${word.learned ? "Đã thuộc" : "Chưa thuộc"}</button>`;
     const action = source === "user"
       ? type === "user"
         ? `<div class="word-actions"><button class="row-action" data-word-edit="${escapeHTML(word.id)}">Sửa</button><button class="row-action row-delete" data-user-link-remove="${escapeHTML(word.id)}" data-group-id="${escapeHTML(group.id)}">Bỏ khỏi nhóm</button><button class="row-action row-delete" data-word-delete="${escapeHTML(word.id)}">Xóa từ</button></div>`
@@ -152,7 +165,7 @@ export function renderWords() {
       : type === "user"
         ? `<div class="word-actions"><button class="row-action row-delete" data-link-remove="${escapeHTML(word.id)}" data-group-id="${escapeHTML(group.id)}">Bỏ khỏi nhóm</button></div>`
         : `<div class="word-actions"><button class="row-action ${alreadyInGroup ? "" : "row-add"}" data-library-add="${escapeHTML(word.id)}" ${word.learned ? "disabled title=\"Đã thuộc\"" : alreadyInGroup ? "disabled title=\"Đã có trong nhóm\"" : ""}>${word.learned ? "Đã thuộc" : alreadyInGroup ? "Đã thêm" : "+ Thêm vào nhóm"}</button></div>`;
-    return `<article class="word-row ${source === "standard" ? "standard-word-row" : "user-word-row"}"><div class="word-character">${escapeHTML(word.traditional)}</div><div class="word-info"><div class="word-title-line"><strong>${escapeHTML(word.meaning)}</strong>${word.learned ? `<span class="learned-tag">Đã thuộc</span>` : `<span class="source-tag">${sourceLabel}</span>`}</div><span class="word-pinyin">${escapeHTML([word.zhuyin, word.pinyin].filter(Boolean).join(" · ") || "Chưa có phiên âm")}</span>${word.han_viet ? `<span class="word-example">Hán Việt: ${escapeHTML(word.han_viet)}</span>` : ""}${word.example ? `<span class="word-example">${escapeHTML(word.example)}</span>` : ""}</div><div class="word-group"><span class="group-pill">${escapeHTML(groupName || "")}</span></div>${action}</article>`;
+    return `<article class="word-row ${source === "standard" ? "standard-word-row" : "user-word-row"}"><div class="word-character">${escapeHTML(word.traditional)}</div><div class="word-info"><div class="word-title-line"><strong>${escapeHTML(word.meaning)}</strong>${statusButton}<span class="source-tag">${sourceLabel}</span></div><span class="word-pinyin">${escapeHTML([word.zhuyin, word.pinyin].filter(Boolean).join(" · ") || "Chưa có phiên âm")}</span>${word.han_viet ? `<span class="word-example">Hán Việt: ${escapeHTML(word.han_viet)}</span>` : ""}${word.example ? `<span class="word-example">${escapeHTML(word.example)}</span>` : ""}</div><div class="word-group"><span class="group-pill">${escapeHTML(groupName || "")}</span></div>${action}</article>`;
   }).join("");
   const pagination = $("#vocabulary-pagination");
   pagination.classList.toggle("hidden", !shouldPaginate || filtered.length === 0);
@@ -170,15 +183,14 @@ export function renderLibraryResults() {
   const personalMatches = state.userWords.filter((word) => !linkedUserWordIds.has(word.id)
     && [word.traditional, word.zhuyin, word.pinyin, word.han_viet, word.meaning, word.example, word.usage_vi].join(" ").toLocaleLowerCase("vi").includes(query)
   ).map((word) => ({ word, source: "user" }));
-  const standardMatches = state.standardWords.filter((word) => !word.learned
-    && !linkedStandardIds.has(word.id)
+  const standardMatches = state.standardWords.filter((word) => !linkedStandardIds.has(word.id)
     && [word.traditional, word.zhuyin, word.pinyin, word.han_viet, word.meaning, word.example, word.usage_vi].join(" ").toLocaleLowerCase("vi").includes(query)
   ).map((word) => ({ word, source: "standard" }));
   const matches = [
     ...personalMatches,
     ...standardMatches,
   ].slice(0, 60);
-  $("#library-results").innerHTML = matches.length ? matches.map(({ word, source }) => `<article class="library-result"><div class="word-character">${escapeHTML(word.traditional)}</div><div class="word-info"><strong>${escapeHTML(word.meaning)}</strong><span class="word-pinyin">${escapeHTML([word.zhuyin, word.pinyin].filter(Boolean).join(" · "))}</span><span class="source-tag">${source === "standard" ? "Thư viện chuẩn" : "Từ riêng"}</span></div><button class="button button-outline button-small" type="button" data-library-add="${escapeHTML(word.id)}" data-library-source="${source}">Thêm vào nhóm</button></article>`).join("") : `<p class="no-groups">${query ? "Không tìm thấy từ phù hợp." : "Không còn từ phù hợp để thêm."}</p>`;
+  $("#library-results").innerHTML = matches.length ? matches.map(({ word, source }) => `<article class="library-result"><div class="word-character">${escapeHTML(word.traditional)}</div><div class="word-info"><strong>${escapeHTML(word.meaning)}</strong><span class="word-pinyin">${escapeHTML([word.zhuyin, word.pinyin].filter(Boolean).join(" · "))}</span><span class="source-tag">${source === "standard" ? "Thư viện chuẩn" : "Từ riêng"}</span><button type="button" class="status-tag ${word.learned ? "learned-tag" : "unlearned-tag"}" data-word-status="${escapeHTML(word.id)}" data-word-source="${source}">${word.learned ? "Đã thuộc" : "Chưa thuộc"}</button></div><button class="button button-outline button-small" type="button" data-library-add="${escapeHTML(word.id)}" data-library-source="${source}" ${word.learned ? "disabled" : ""}>${word.learned ? "Đã thuộc" : "Thêm vào nhóm"}</button></article>`).join("") : `<p class="no-groups">${query ? "Không tìm thấy từ phù hợp." : "Không còn từ phù hợp để thêm."}</p>`;
 }
 
 // openWordDialog(): mở dialog thêm/sửa từ; nếu mode là custom thì hiện form nhập tay, nếu library thì hiện tìm kiếm thư viện.
@@ -223,6 +235,7 @@ export function setWordMode(mode) {
 export function studyWords() {
   let entries;
   if (state.studyGroup === "current") entries = visibleWords();
+  else if (state.studyGroup === "custom") entries = state.userWords.map((word) => ({ word }));
   else if (state.studyGroup.startsWith("standard:")) {
     const groupId = state.studyGroup.slice(9);
     entries = state.standardWords.filter((word) => word.standard_group_id === groupId).map((word) => ({ word }));
@@ -237,7 +250,13 @@ export function studyWords() {
   } else {
     entries = [...state.standardWords, ...state.userWords].map((word) => ({ word }));
   }
-  return entries.map(({ word }) => word);
+  const eligible = entries.map(({ word }) => word).filter((word) => !word.learned || word.id === state.studyRetainedId);
+  if (state.studyDeck && state.studyDeckKey === state.studyGroup) return state.studyDeck;
+  return eligible;
+}
+
+export function learnedWords() {
+  return [...state.standardWords, ...state.userWords].filter((word) => word.learned);
 }
 
 // renderCard(): cập nhật nội dung và trạng thái của flashcard hiện tại khi lật thẻ hoặc chuyển thẻ.
@@ -285,16 +304,4 @@ export function renderCard() {
   $("#study-next").disabled = words.length < 2;
   $("#mark-learned").textContent = word?.learned ? "✓ Đã thuộc" : "✓ Đánh dấu đã thuộc";
   $("#mark-learned").classList.toggle("marked", Boolean(word?.learned));
-}
-
-// openStudy(): mở dialog flashcard với nhóm học đang chọn và reset trạng thái thẻ.
-export function openStudy() {
-  if (state.activeGroup !== "all") state.studyGroup = "current";
-  $("#study-group").value = state.studyGroup;
-  const words = studyWords();
-  if (!words.length) notify("Nhóm này chưa có từ để ôn.");
-  state.studyIndex = 0;
-  state.flipped = false;
-  $("#study-dialog").showModal();
-  renderCard();
 }
