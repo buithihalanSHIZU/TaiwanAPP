@@ -1,4 +1,4 @@
-const CACHE_NAME = "tu-dai-loan-shell-v3";
+const CACHE_NAME = "tu-dai-loan-shell-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
